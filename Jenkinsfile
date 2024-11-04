@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        CONDA_ENV = 'pyspark'  // Name of the Conda environment you want to use
+        CONDA_ENV = 'pyspark'                   // Name of the Conda environment you want to use
         CONDA_HOME = '/home/ubuntu/miniconda3'  // Path to your Conda installation
     }
 
@@ -44,8 +44,8 @@ pipeline {
             steps {
                 echo 'Activating the Conda environment and installing dependencies...'
                 sh """
-                    source ${CONDA_HOME}/bin/activate ${CONDA_ENV}
-                    pip install -r requirements.txt
+                    source ${CONDA_HOME}/bin/activate ${CONDA_ENV} || true
+                    ${CONDA_HOME}/bin/conda run -n ${CONDA_ENV} pip install -r requirements.txt
                 """
                 echo 'Dependencies installed successfully.'
             }
@@ -55,8 +55,8 @@ pipeline {
             steps {
                 echo 'Running tests with pytest...'
                 sh """
-                    source ${CONDA_HOME}/bin/activate ${CONDA_ENV}
-                    pytest --maxfail=1 --disable-warnings
+                    source ${CONDA_HOME}/bin/activate ${CONDA_ENV} || true
+                    ${CONDA_HOME}/bin/conda run -n ${CONDA_ENV} pytest --maxfail=1 --disable-warnings
                 """
                 echo 'Tests completed.'
             }
