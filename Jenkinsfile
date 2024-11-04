@@ -40,13 +40,10 @@ pipeline {
             }
         }
 
-        stage('Activate Environment and Install Dependencies') {
+        stage('Install Dependencies') {
             steps {
-                echo 'Activating the Conda environment and installing dependencies...'
-                sh """
-                    source ${CONDA_HOME}/bin/activate ${CONDA_ENV} || true
-                    ${CONDA_HOME}/bin/conda run -n ${CONDA_ENV} pip install -r requirements.txt
-                """
+                echo 'Installing dependencies...'
+                sh "${CONDA_HOME}/bin/conda run -n ${CONDA_ENV} pip install -r requirements.txt"
                 echo 'Dependencies installed successfully.'
             }
         }
@@ -54,10 +51,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 echo 'Running tests with pytest...'
-                sh """
-                    source ${CONDA_HOME}/bin/activate ${CONDA_ENV} || true
-                    ${CONDA_HOME}/bin/conda run -n ${CONDA_ENV} pytest --maxfail=1 --disable-warnings
-                """
+                sh "${CONDA_HOME}/bin/conda run -n ${CONDA_ENV} pytest --maxfail=1 --disable-warnings"
                 echo 'Tests completed.'
             }
         }
