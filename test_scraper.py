@@ -1,4 +1,6 @@
 from scraper import get_data
+
+
 def test_get_data():
     url = 'https://quotes.toscrape.com/'
     data = get_data(url)
