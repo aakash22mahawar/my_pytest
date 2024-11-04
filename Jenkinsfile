@@ -12,17 +12,11 @@ pipeline {
                 expression { env.BRANCH_NAME == 'master' }
             }
             steps {
-                echo "Running on branch: ${env.BRANCH_NAME}"
-                if (env.BRANCH_NAME != 'master') {
-                    error("Pipeline is configured to run on the 'master' branch only.")
-                }
+                echo "Running on the 'master' branch..."
             }
         }
 
         stage('Clone Repository') {
-            when {
-                branch 'master'
-            }
             steps {
                 echo 'Cloning the repository...'
                 checkout scm
@@ -31,9 +25,6 @@ pipeline {
         }
 
         stage('Setup Conda Environment') {
-            when {
-                branch 'master'
-            }
             steps {
                 script {
                     echo "Checking if the Conda environment ${CONDA_ENV} exists..."
@@ -50,13 +41,10 @@ pipeline {
         }
 
         stage('Activate Environment and Install Dependencies') {
-            when {
-                branch 'master'
-            }
             steps {
                 echo 'Activating the Conda environment and installing dependencies...'
                 sh """
-                    source ${CONDA_HOME}/bin/activate ${CONDA_ENV} && \
+                    source ${CONDA_HOME}/bin/activate ${CONDA_ENV}
                     pip install -r requirements.txt
                 """
                 echo 'Dependencies installed successfully.'
@@ -64,13 +52,10 @@ pipeline {
         }
 
         stage('Run Tests') {
-            when {
-                branch 'master'
-            }
             steps {
                 echo 'Running tests with pytest...'
                 sh """
-                    source ${CONDA_HOME}/bin/activate ${CONDA_ENV} && \
+                    source ${CONDA_HOME}/bin/activate ${CONDA_ENV}
                     pytest --maxfail=1 --disable-warnings
                 """
                 echo 'Tests completed.'
