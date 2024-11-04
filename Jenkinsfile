@@ -7,20 +7,36 @@ pipeline {
     }
 
     stages {
+        stage('Check Branch') {
+            when {
+                expression { env.BRANCH_NAME == 'master' }
+            }
+            steps {
+                echo "Running on branch: ${env.BRANCH_NAME}"
+                if (env.BRANCH_NAME != 'master') {
+                    error("Pipeline is configured to run on the 'master' branch only.")
+                }
+            }
+        }
+
         stage('Clone Repository') {
+            when {
+                branch 'master'
+            }
             steps {
                 echo 'Cloning the repository...'
-                // Clone the repository
                 checkout scm
                 echo 'Repository cloned successfully.'
             }
         }
 
         stage('Setup Conda Environment') {
+            when {
+                branch 'master'
+            }
             steps {
                 script {
                     echo "Checking if the Conda environment ${CONDA_ENV} exists..."
-                    // Check if the Conda environment already exists
                     def envExists = sh(script: "${CONDA_HOME}/bin/conda env list | grep ${CONDA_ENV}", returnStatus: true) == 0
 
                     if (!envExists) {
@@ -34,11 +50,13 @@ pipeline {
         }
 
         stage('Activate Environment and Install Dependencies') {
+            when {
+                branch 'master'
+            }
             steps {
                 echo 'Activating the Conda environment and installing dependencies...'
-                // Activate the Conda environment and install dependencies
                 sh """
-                    source ${CONDA_HOME}/bin/activate ${CONDA_ENV}
+                    source ${CONDA_HOME}/bin/activate ${CONDA_ENV} && \
                     pip install -r requirements.txt
                 """
                 echo 'Dependencies installed successfully.'
@@ -46,11 +64,13 @@ pipeline {
         }
 
         stage('Run Tests') {
+            when {
+                branch 'master'
+            }
             steps {
                 echo 'Running tests with pytest...'
-                // Run pytest with warnings disabled
                 sh """
-                    source ${CONDA_HOME}/bin/activate ${CONDA_ENV}
+                    source ${CONDA_HOME}/bin/activate ${CONDA_ENV} && \
                     pytest --maxfail=1 --disable-warnings
                 """
                 echo 'Tests completed.'
@@ -65,10 +85,5 @@ pipeline {
         failure {
             echo 'Pipeline failed. Please check the test results or console output for details.'
         }
-    }
-
-    // Specify branch condition manually
-    when {
-        branch 'master'  // Only run this pipeline on the 'master' branch
     }
 }
